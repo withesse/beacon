@@ -3,6 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+version = "0.1.0"
+
 android {
     namespace = "com.withesse.beacon"
     compileSdk = 34
