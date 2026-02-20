@@ -115,7 +115,7 @@ object LogExporter {
     ) {
         val zip = export(context, daysBack, includeApm, includeCrash)
         val uri = FileProvider.getUriForFile(
-            context, "${context.packageName}.beacon.fileprovider", zip
+            context, "${context.packageName}.fileprovider", zip
         )
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "application/zip"

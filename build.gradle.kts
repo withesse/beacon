@@ -7,7 +7,7 @@ version = "0.1.0"
 
 android {
     namespace = "com.withesse.beacon"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 21
@@ -15,12 +15,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "11"
     }
 }
 
@@ -29,10 +29,7 @@ dependencies {
     implementation("com.tencent.mars:mars-xlog:1.2.6")
 
     // MMKV: high-performance KV storage (config persistence) | 高性能 KV 存储（配置持久化）
-    implementation("com.tencent:mmkv:1.3.4")
-
-    // xCrash: unified Java + Native + ANR capture | Java + Native + ANR 统一捕获
-    implementation("com.iqiyi.xcrash:xcrash-android-lib:3.1.0")
+    implementation("com.tencent:mmkv:1.3.14")
 
     // Coroutines | 协程
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")

@@ -20,6 +20,7 @@ object LogEngine {
         private set
 
     private lateinit var cacheDir: String
+    private var xlog: Xlog? = null
     @Volatile
     private var initialized = false
 
@@ -32,20 +33,11 @@ object LogEngine {
         File(logDir).mkdirs()
         File(cacheDir).mkdirs()
 
-        val xlogConfig = Xlog.XLogConfig().apply {
-            level = if (config.fileEnabled) config.logLevel else android.util.Log.ASSERT
-            logdir = this@LogEngine.logDir
-            cachedir = this@LogEngine.cacheDir
-            nameprefix = "app"
-            compressmode = Xlog.AppednerModeAsync
-            compresslevel = 0
-            pubkey = ""
-            cachedays = 0
-        }
-
-        Xlog.open(xlogConfig)
-        Xlog.setConsoleLogOpen(false)
-        com.tencent.mars.xlog.Log.setLogImp(Xlog())
+        val level = if (config.fileEnabled) config.logLevel else android.util.Log.ASSERT
+        Xlog.open(true, level, Xlog.AppednerModeAsync, cacheDir, logDir, "app", "")
+        xlog = Xlog()
+        xlog?.setConsoleLogOpen(0, false)
+        com.tencent.mars.xlog.Log.setLogImp(xlog)
         initialized = true
     }
 
@@ -83,16 +75,17 @@ object LogEngine {
     }
 
     fun flush() {
-        if (initialized) Xlog.flush(true)
+        if (initialized) xlog?.appenderFlush(0, true)
     }
 
     fun setLevel(level: Int) {
-        if (initialized) Xlog.setLevel(level)
+        // Not supported in mars-xlog 1.2.6
     }
 
     fun close() {
         if (initialized) {
-            Xlog.close()
+            xlog?.appenderClose()
+            xlog = null
             initialized = false
         }
     }

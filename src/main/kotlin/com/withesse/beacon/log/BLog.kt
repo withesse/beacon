@@ -62,7 +62,8 @@ object BLog {
         return config.enabled && level >= config.logLevel
     }
 
-    private fun log(level: Int, tag: String, msg: String, t: Throwable? = null) {
+    @PublishedApi
+    internal fun log(level: Int, tag: String, msg: String, t: Throwable? = null) {
         if (!Beacon.isInitialized) {
             Log.w("BLog", "Beacon not initialized, call Beacon.init() first. Dropping: [$tag] $msg")
             return
