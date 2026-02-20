@@ -141,6 +141,21 @@ object Beacon {
     }
 
     /**
+     * Clear all log data under filesDir/beacon/.
+     * 清除 filesDir/beacon/ 下的所有日志数据。
+     */
+    @JvmStatic
+    fun clearLogData() {
+        if (!isInitialized) return
+        try {
+            File("${application.filesDir}/beacon").deleteRecursively()
+            File("${application.filesDir}/beacon").mkdirs()
+        } catch (e: Exception) {
+            android.util.Log.w("Beacon", "clearLogData failed", e)
+        }
+    }
+
+    /**
      * Graceful shutdown, release all resources.
      * Can call init() again to re-initialize.
      *

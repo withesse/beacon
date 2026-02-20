@@ -190,6 +190,40 @@ object LogExporter {
     }
 
     @JvmStatic
+    fun getLogDataSize(): Long {
+        if (!Beacon.isInitialized) return 0L
+        return try {
+            File("${Beacon.application.filesDir}/beacon").walkTopDown()
+                .filter { it.isFile }.sumOf { it.length() }
+        } catch (_: Exception) { 0L }
+    }
+
+    /**
+     * Get log data breakdown by category.
+     * 按分类获取日志数据大小明细。
+     *
+     * @return Map of category key to size in bytes. Keys: "logs", "apm", "crash"
+     */
+    @JvmStatic
+    fun getLogDataBreakdown(): Map<String, Long> {
+        if (!Beacon.isInitialized) return emptyMap()
+        return try {
+            val beaconDir = File("${Beacon.application.filesDir}/beacon")
+            val result = mutableMapOf<String, Long>()
+            beaconDir.listFiles()?.forEach { dir ->
+                if (dir.isDirectory) {
+                    val size = dir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+                    if (size > 0) result[dir.name] = size
+                } else {
+                    val size = dir.length()
+                    if (size > 0) result["other"] = (result["other"] ?: 0L) + size
+                }
+            }
+            result
+        } catch (_: Exception) { emptyMap() }
+    }
+
+    @JvmStatic
     fun cleanCache(context: Context) {
         File(context.cacheDir, "beacon_export").deleteRecursively()
     }
