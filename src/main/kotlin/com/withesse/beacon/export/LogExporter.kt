@@ -11,6 +11,7 @@ import com.withesse.beacon.Beacon
 import com.withesse.beacon.apm.CrashCaptor
 import com.withesse.beacon.apm.PerfLogger
 import com.withesse.beacon.log.LogEngine
+import com.withesse.beacon.log.XLogDecoder
 import android.os.Handler
 import android.os.Looper
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +34,7 @@ import java.util.zip.ZipOutputStream
  * Zip structure | 导出 zip 结构:
  *   beacon_20260219_143052.zip
  *   ├── device_info.txt
- *   ├── logs/app_20260219.xlog
+ *   ├── logs/app_20260219.log      (decoded plain text | 解码后的纯文本)
  *   ├── crash/xxx.xcrash.log
  *   └── apm/perf_20260219.jsonl
  */
@@ -68,10 +69,26 @@ object LogExporter {
         val cutoff = System.currentTimeMillis() - daysBack * 24 * 3600 * 1000L
         val entries = mutableListOf<Pair<String, File>>()
 
-        // App logs | 业务日志
+        // App logs — decode xlog to readable text | 业务日志 — 解码 xlog 为可读文本
         File(LogEngine.logDir).listFiles()
             ?.filter { it.isFile && !it.name.startsWith("cache") && it.lastModified() >= cutoff }
-            ?.forEach { entries.add("logs/${it.name}" to it) }
+            ?.forEach { file ->
+                if (file.extension == "xlog") {
+                    try {
+                        val decoded = File(exportDir, file.nameWithoutExtension + ".log")
+                        if (XLogDecoder.decode(file, decoded)) {
+                            entries.add("logs/${decoded.name}" to decoded)
+                        } else {
+                            entries.add("logs/${file.name}" to file)
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.w("LogExporter", "Decode failed: ${file.name}", e)
+                        entries.add("logs/${file.name}" to file)
+                    }
+                } else {
+                    entries.add("logs/${file.name}" to file)
+                }
+            }
 
         // Crash
         if (includeCrash) {
